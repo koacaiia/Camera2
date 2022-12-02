@@ -113,5 +113,40 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+    public void initCameraAndPreview(){
+        HandlerThread handlerThread = new HandlerThread("CAMERA2");
+        handlerThread.start();
+        mHandler = new Handler(handlerThread.getLooper());
+        Handler mainHandler = new Handler(getMainLooper());
+        try {
+        String mCameraId = ""+ CameraCharacteristics.LENS_FACING_FRONT;
+        CameraManager mCameraManager = (CameraManager) this.getSystemService(Context.CAMERA_SERVICE);
+        CameraCharacteristics characteristics = mCameraManager.getCameraCharacteristics(mCameraId);
+        StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+        Size largestPreviewSize = map.getOutputSizes(ImageFormat.JPEG)[0];
+        Log.i("LargestSize",largestPreviewSize.getWidth()+""+largestPreviewSize.getHeight());
+        setAspectRaionTexturePreview(largestPreviewSize.getHeight(),largestPreviewSize.getWidth());
+        mImageReader = ImageReader.newInstance(largestPreviewSize.getWidth(),largestPreviewSize.getHeight(),ImageFormat.JPEG,/*maxImages*/7);
+        mImageReader.setOnImageAvailableListener(mOnImageAvailableListener,mainHandler);
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+            return;
+        }
+        mCameraManager.openCamera(mCameraId,deviceStateCallback,mHandler);
+        } catch (CameraAccessException e) {
+            Toast.makeText(this,"Cannot Open Camera.",Toast.LENGTH_SHORT).show();
+        }
 
+
+    }
+    private ImageReader.OnImageAvailableListener mOnImageAvailableListener = new ImageReader.OnImageAvailableListener() {
+        @Override
+        public void onImageAvailable(ImageReader reader) {
+            Image image = reader.acquireNextImage();
+            ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+            byte[] bytes = new byte[buffer.remaining()];
+            buffer.get(bytes);
+            final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+            new SaveImageTask().execute(bitmap);
+        }
+    };
 }
