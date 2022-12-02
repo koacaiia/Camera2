@@ -87,11 +87,30 @@ public class MainActivity extends AppCompatActivity {
         mSensorManager.unregisterListener(deviceOrientation.getEventListener());
     }
     public void initSurfaceView(){
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        mDSI_height = displayMetrics.heightPixels;
+        mDSI_width = displayMetrics.widthPixels;
 
-    }
-    public void initCameraAndPreview(){
+        mSurfaceViewHolder = mSurfaceView.getHolder();
+        mSurfaceViewHolder.addCallback(new SurfaceHolder.Callback() {
+            @Override
+            public void surfaceCreated(@NonNull SurfaceHolder holder) {
+                initCameraAndPreview();
+            }
+            @Override
+            public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
+                if(mCameraDevice  !=null){
+                    mCameraDevice.close();
+                    mCameraDevice = null;
+                }
+            }
 
+            @Override
+            public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
 
+            }
+        });
 
     }
 
