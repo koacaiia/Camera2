@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 
 import java.security.Permissions;
 import java.util.Arrays;
@@ -21,18 +22,20 @@ public class LaunchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launch);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if(!hasPermissions(PERMISSIONS)){
-                requestPermissions(PERMISSIONS,PERMISSIONS_REQUEST_CODE);
-            }else{
-                Intent mainIntent = new Intent(LaunchActivity.this,MainActivity.class);
-                startActivity(mainIntent);
-                finish();
-            }
+        if (!hasPermissions(PERMISSIONS)) {
+
+            requestPermissions(PERMISSIONS, PERMISSIONS_REQUEST_CODE);
+        } else {
+            Intent mainIntent = new Intent(LaunchActivity.this, MainActivity.class);
+            startActivity(mainIntent);
+            finish();
         }
     }
+
+
     static final int PERMISSIONS_REQUEST_CODE = 1000;
-    String[] PERMISSIONS = {Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    String[] PERMISSIONS = {Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     private boolean hasPermissions(String[] permissions){
         int result;
@@ -56,7 +59,9 @@ public class LaunchActivity extends AppCompatActivity {
                 boolean diskPerMissionAccepted = grantResults[1]
                         == PackageManager.PERMISSION_GRANTED;
                 if(!cameraPermissionAccepted ||!diskPerMissionAccepted){
+                    Log.i("TestValue","Permisssion Denied");
                     showDialogForPermission("Granted Permission for Run This App.!");
+
                 }else{
                     Intent mainIntent = new Intent(LaunchActivity.this,MainActivity.class);
                     startActivity(mainIntent);
@@ -75,6 +80,7 @@ public class LaunchActivity extends AppCompatActivity {
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+
                 requestPermissions(PERMISSIONS,PERMISSIONS_REQUEST_CODE);
             }
         });
